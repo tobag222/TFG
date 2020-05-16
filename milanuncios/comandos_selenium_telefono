@@ -1,0 +1,16 @@
+from selenium import webdriver
+driver = webdriver.Chrome('./chromedriver')
+driver.get('https://www.milanuncios.com/bull-terrier/cachorritos-de-bull-terrier-341205942.htm#fotos') 
+
+# aqui si la pantalla está pequeña puede petar (pork haya algo clicable encima)
+# además tal vez haya que hacer que espere para que dé tiempo a que abra
+driver.find_element_by_class_name("byCall").click()
+
+
+driver.switch_to.frame(driver.find_element_by_id("ifrw"))
+
+#para ver lo que contiene la pagina que estás mirando
+driver.page_source
+
+driver.find_element_by_class_name("telefonos") 
+
