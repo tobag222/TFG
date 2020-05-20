@@ -15,29 +15,15 @@ e importamos otra clase llamada CrawlSpider
 class PerrosSpider(CrawlSpider):
     name = 'perros'
     allowed_domains = ['milanuncios.com']
-    start_urls = ['http://milanuncios.com/perros/?fromSearch=1/']
-    # il = ItemLoader(item= MilanunciosItem(), response=response)
-    
+    start_urls = ['http://milanuncios.com/venta-de-perros/?fromSearch=1']
 
-    rules = [Rule(LinkExtractor(allow=('#fotos')), callback='parse_fotos', follow=True)]
-    # driver = webdriver.Chrome('./chromedriver')  
+    rules = [Rule(LinkExtractor(allow=('#fotos')), callback='parse_fotos', follow=True)]  
 
     def parse_fotos(self, response):
-        # il = ItemLoader(item= MilanunciosItem(), response=response)
-        # print ("pased fotos")
-        # fotos_urls = response.xpath('//*[@class="pagAnuFoto"]/img/@src').extract()
-        # for url in fotos_urls:
-        #     yield url
-        # pass
-        # self.driver.get(response.url)
-        # self.driver.find_element_by_class_name("byCall").click()
-        # self.driver.swi
-        item = MilanunciosItem()
-        # il = ItemLoader(item= MilanunciosItem(), response=response)
+        
         url_an = response.url
         adId = response.xpath('//div[@class="pillDiv pillRef"]/strong/text()').extract_first()
         contact_url_base = "https://www.milanuncios.com/datos-contacto/?usePhoneProxy=0&from=detail&id="
-        # telefono es un item devuelto desde el callback parse_telefono()
        
         
         fotos = response.xpath('//*[@class="pagAnuFoto"]/img/@src').extract()
@@ -52,59 +38,53 @@ class PerrosSpider(CrawlSpider):
         refanuncio = response.xpath('//div[@class="pillDiv pillRef"]/strong/text()').extract_first()
         pattern = "\((.*?)\)" # la ciudad viene como "- labradores(MADRID)"
         localizacion = re.search(pattern, str(response.xpath('//div[@class="pagAnuCatLoc"]/text()').extract_first())).group(1)
-        print("                LOCALIZACION: ",localizacion)
 
-
-        # il.replace_value('urlanuncio', url_an)
-        # il.replace_value('fotos', fotos)
-        # il.replace_value('titulo', titulo)
-        # il.replace_value('texto', texto)
-        # il.replace_value('telefono', telefono)
-
-        item['urlanuncio']=url_an
-        item['image_urls']=fotos
-        item['titulo']=titulo
-        item['texto']=texto
-        item['tipoContacto']=tipoContacto
-        item['anunciante']=anunciante
-        item['refanuncio']=refanuncio
-        item['localizacion'] = localizacion
-
-        # print("contact url is: ",contact_url_base+adId)
-        
-        # yield self.il.load_item()
         request = Request(
             url=contact_url_base+adId,
             callback=self.parse_telefono,
-            meta={'item':item}
-            # meta={'itemLoader':il}
+            meta={
+                'urlanuncio': url_an,
+                'image_urls': fotos,
+                'titulo': titulo,
+                'texto': texto,
+                'tipoContacto': tipoContacto,
+                'anunciante': anunciante,
+                'refanuncio': refanuncio,
+                'localizacion': localizacion
+            }
         )
-        # il = ItemLoader(item= item, response=response)
-        # yield il.load_item()
-        # print("----------------------------")
-        # print(item.values)
-        # print("----------------------------")
         yield request
 
     
-    def parse_telefono(self, response):
+    def parse_telefono(self, response):        
         codigo_pagina = str(response.body)
-        pattern = "getTrackingPhone\((.*?)\)"
-        telefono = re.search(pattern, str(codigo_pagina)).group(1)
-        # if str(response.xpath('//div[@class="texto"]/div/strong/text()').extract_first()).startswith('MUY IMPORTANTE'):
-        #     anunciante = response.xpath('//div[@class="texto"]/div[2]/strong/text()').extract_first()
-        # else:
-        #     anunciante = response.xpath('//div[@class="texto"]/div/strong/text()').extract_first()
-        # print(":::::::::::::::TELEFONO::::::::::::::::::::\n")
-        # print(telefono)
-        # print(":::::::::::::::::::::::::::::::::::::::::::\n")
-        item = response.meta['item']
-        # il = ItemLoader(item= item, response=response)
-        item['telefono']=telefono
-        # item['anunciante']=anunciante
-        # self.il.load_item()
+        il = ItemLoader(item= MilanunciosItem(), response=response)
 
-        return item
+        pattern = "getTrackingPhone\((.*?)\)"
+
+        urlanuncio = response.meta['urlanuncio']
+        image_urls = response.meta['image_urls']
+        titulo = response.meta['titulo']
+        texto = response.meta['texto']
+        tipoContacto = response.meta['tipoContacto']
+        anunciante = response.meta['anunciante']
+        refanuncio = response.meta['refanuncio']
+        localizacion = response.meta['localizacion']
+
+        telefono = re.search(pattern, str(codigo_pagina)).group(1)
+
+        il.replace_value('urlanuncio',urlanuncio)
+        il.replace_value('image_urls',image_urls)
+        il.replace_value('titulo',titulo)
+        il.replace_value('texto',texto)
+        il.replace_value('tipoContacto',tipoContacto)
+        il.replace_value('anunciante',anunciante)
+        il.replace_value('refanuncio',refanuncio)
+        il.replace_value('localizacion',localizacion)
+        il.replace_value('telefono',telefono)
+
+        yield il.load_item()
+
 
 
         

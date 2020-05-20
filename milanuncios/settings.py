@@ -65,8 +65,9 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.htmlz
 ITEM_PIPELINES = {
-    'milanuncios.pipelines.MilanunciosPipeline': 300,
     'scrapy.pipelines.images.ImagesPipeline':1,
+    # 'milanuncios.pipelines.MisImagenesPipeline':1,
+    'milanuncios.pipelines.MilanunciosPipeline': 2,
 }
 IMAGES_STORE='./imagenes_perros'
 # Enable and configure the AutoThrottle extension (disabled by default)
