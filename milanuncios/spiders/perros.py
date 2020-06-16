@@ -5,6 +5,8 @@ from scrapy.loader import ItemLoader
 from milanuncios.items import MilanunciosItem
 from scrapy import Request
 import re
+
+import random
 # from selenium import webdriver
 # from scrapy.selector import Selector
 '''
@@ -15,10 +17,12 @@ e importamos otra clase llamada CrawlSpider
 class PerrosSpider(CrawlSpider):
     name = 'perros'
     allowed_domains = ['milanuncios.com']
+    randnum = random.randrange(1,5)
+    # start_urls = ['http://milanuncios.com/venta-de-perros/?fromSearch='+str(randnum)]
     start_urls = ['http://milanuncios.com/venta-de-perros/?fromSearch=1']
 
-    rules = [Rule(LinkExtractor(allow=('#fotos')), callback='parse_fotos', follow=True)]  
-
+    rules = [Rule(LinkExtractor(allow=('#fotos')), callback='parse_fotos', follow=True), Rule(LinkExtractor(restrict_xpaths=('//*[contains(@class,"adlist-paginator-pagelink adlist-paginator-pageselected")][contains(@onclick,"pSiguiente")]')),callback='parse', follow=True)]  
+  
     def parse_fotos(self, response):
         
         url_an = response.url
@@ -54,6 +58,8 @@ class PerrosSpider(CrawlSpider):
             }
         )
         yield request
+
+
 
     
     def parse_telefono(self, response):        
